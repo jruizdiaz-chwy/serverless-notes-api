@@ -1,7 +1,7 @@
 Resources:
   # The federated identity for our user pool to auth with
-  CognitoIdentitPool:
-    Type: AWS::CognitoIdentityPool
+  CognitoIdentityPool:
+    Type: AWS::Cognito::IdentityPool
     Properties:
       # Generate a name based on the stage
       IdentityPoolName: ${self:custom.stage}IdentityPool
@@ -16,10 +16,21 @@ Resources:
   
   # IAM roles
   CognitoIdentityPoolRoles:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId:
+        Ref: CognitoIdentityPool
+      Roles:
+        authenticated:
+          Fn::GetAtt: [CognitoAuthRole, Arn]
+  
+
+  # IAM role used for authenticated users
+  CognitoAuthRole:
     Type: AWS::IAM::Role
     Properties:
       Path: /
-      AssumeRolePolicyDocuemnt:
+      AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: 'Allow'
@@ -31,7 +42,7 @@ Resources:
               StringEquals:
                 'cognito-identity.amazonaws.com:aud':
                   Ref: CognitoIdentityPool
-              'ForAnyValue:StingLike':
+              'ForAnyValue:StringLike':
                 'cognito-identity.amazonaws.com:amr': authenticated
       Policies:
         - PolicyName: 'CognitoAuthorizedPolicy'

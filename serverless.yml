@@ -47,7 +47,7 @@ provider:
         # Restrict our IAM role permissions to
         # the specific table for the stage.
         Resource:
-          - "Fn:GetAtt": [ NotesTable, Arn ]
+          - "Fn::GetAtt": [ NotesTable, Arn ]
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
@@ -96,13 +96,21 @@ functions:
             method: delete
             cors: true
             authorizer: aws_iam
+    billing:
+        handler: billing.main
+        events:
+          - http:
+              path: billing
+              method: post
+              cors: true
+              authorizer: aws_iam
 
 # Create our resources with separate CloudFormation templates
 resources:
   # API Gateway Errors
   - ${file(resources/api-gateway-errors.yml)}
   # DynamoDB
-  - ${file(resoureces/dynamodb-table.yml)}
+  - ${file(resources/dynamodb-table.yml)}
   # S3
   - ${file(resources/s3-bucket.yml)}
   # Cognito
