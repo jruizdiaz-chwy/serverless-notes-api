@@ -1,6 +1,6 @@
 import { calculateCost } from '../libs/billing-lib';
 
-test('Lowsst tier', () => {
+test('Lowest tier', () => {
   const storage = 10;
 
   const cost = 4000;
