@@ -1,4 +1,8 @@
-service: notes-app-api-2
+service: alpha-notes
+
+# Create an optimized package for our functions
+package:
+  individually: true
 
 # Use the serverless-webpack plugin to transpile ES6
 plugins:
@@ -12,12 +16,7 @@ custom:
   # Or fallsback to what we have set in the proovider section.
   stage: ${opt:stage, self:provider.stage}
   # Set the table name here so we can use it while testing locally.
-  tableName: ${self:custom.stage}-notes-2
-  # Set our DynamoDB throughput for prod and all other non-prod stages.
-  tableThroughputs:
-    prod: 5
-    default: 1
-  tableThroughput: ${self:custom.tableThroughputs.${self:custom.stage}, self:custom.tableThroughputs.default}
+  tableName: alpha-notes
   # Load our webpack config
   webpack:
     webpackConfig: ./webpack.config.js
@@ -28,11 +27,11 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   stage: dev
-  region: us-east-2
+  region: us-west-1
   apiKeys:
-    - notes-client
+    - alpha-notes-client
 
   environment:
     tableName: ${self:custom.tableName}
@@ -52,8 +51,7 @@ provider:
           - dynamodb:DeleteItem
         # Restrict our IAM role permissions to
         # the specific table for the stage.
-        Resource:
-          - "Fn::GetAtt": [ NotesTable, Arn ]
+        Resource: "arn:aws:dynamodb:us-west-1:398398166530:table/alpha-notes"
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
@@ -102,23 +100,8 @@ functions:
             method: delete
             cors: true
             private: true
-    billing:
-      handler: billing.main
-      events:
-        - http:
-            path: billing
-            method: post
-            cors: true
-            private: true
 
 # Create our resources with separate CloudFormation templates
 resources:
   # API Gateway Errors
   - ${file(resources/api-gateway-errors.yml)}
-  # DynamoDB
-  - ${file(resources/dynamodb-table.yml)}
-  # S3
-  - ${file(resources/s3-bucket.yml)}
-  # Cognito
-  - ${file(resources/cognito-user-pool.yml)}
-  - ${file(resources/cognito-identity-pool.yml)}
