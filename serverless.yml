@@ -17,6 +17,8 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   # Set the table name here so we can use it while testing locally.
   tableName: alpha-notes
+  # Set the client app name here to name the api keys accordingly.
+  clientName: notes-client
   # Load our webpack config
   webpack:
     webpackConfig: ./webpack.config.js
@@ -31,7 +33,7 @@ provider:
   stage: dev
   region: us-west-1
   apiKeys:
-    - alpha-notes-client
+    - ${self:custom.clientName}
 
   environment:
     tableName: ${self:custom.tableName}
@@ -51,7 +53,7 @@ provider:
           - dynamodb:DeleteItem
         # Restrict our IAM role permissions to
         # the specific table for the stage.
-        Resource: "arn:aws:dynamodb:us-west-1:398398166530:table/alpha-notes"
+        Resource: "arn:aws:dynamodb:us-west-1:398398166530:table/${self:custom.tableName}"
 
 functions:
   # Defines an HTTP API endpoint that calls the main function in create.js
